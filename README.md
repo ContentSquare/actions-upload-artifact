@@ -38,49 +38,13 @@ See also [download-artifact](https://github.com/actions/download-artifact).
     - [Permission Loss](#permission-loss)
   - [Where does the upload go?](#where-does-the-upload-go)
 
+## What's new
 
-## v6 - What's new
-
-> [!IMPORTANT]
-> actions/upload-artifact@v6 now runs on Node.js 24 (`runs.using: node24`) and requires a minimum Actions Runner version of 2.327.1. If you are using self-hosted runners, ensure they are updated before upgrading.
-
-### Node.js 24
-
-This release updates the runtime to Node.js 24. v5 had preliminary support for Node.js 24, however this action was by default still running on Node.js 20. Now this action by default will run on Node.js 24.
-
-## v4 - What's new
-
-> [!IMPORTANT]
-> upload-artifact@v4+ is not currently supported on GitHub Enterprise Server (GHES) yet. If you are on GHES, you must use [v3](https://github.com/actions/upload-artifact/releases/tag/v3) (Node 16) or [v3-node20](https://github.com/actions/upload-artifact/releases/tag/v3-node20) (Node 20).
-
-The release of upload-artifact@v4 and download-artifact@v4 are major changes to the backend architecture of Artifacts. They have numerous performance and behavioral improvements.
-
-For more information, see the [`@actions/artifact`](https://github.com/actions/toolkit/tree/main/packages/artifact) documentation.
-
-There is also a new sub-action, `actions/upload-artifact/merge`. For more info, check out that action's [README](./merge/README.md).
-
-### Improvements
-
-1. Uploads are significantly faster, upwards of 90% improvement in worst case scenarios.
-2. Once uploaded, an Artifact ID is returned and Artifacts are immediately available in the UI and [REST API](https://docs.github.com/en/rest/actions/artifacts). Previously, you would have to wait for the run to be completed before an ID was available or any APIs could be utilized.
-3. The contents of an Artifact are uploaded together into an _immutable_ archive. They cannot be altered by subsequent jobs unless the Artifacts are deleted and recreated (where they will have a new ID). Both of these factors help reduce the possibility of accidentally corrupting Artifact files.
-4. The compression level of an Artifact can be manually tweaked for speed or size reduction.
-
-### Breaking Changes
-
-1. On self hosted runners, additional [firewall rules](https://github.com/actions/toolkit/tree/main/packages/artifact#breaking-changes) may be required.
-2. Uploading to the same named Artifact multiple times.
-
-    Due to how Artifacts are created in this new version, it is no longer possible to upload to the same named Artifact multiple times. You must either split the uploads into multiple Artifacts with different names, or only upload once. Otherwise you _will_ encounter an error.
-
-3. Limit of Artifacts for an individual job. Each job in a workflow run now has a limit of 500 artifacts.
-4. With `v4.4` and later, hidden files are excluded by default.
-
-For assistance with breaking changes, see [MIGRATION.md](docs/MIGRATION.md).
+Check out the [releases page](https://github.com/actions/upload-artifact/releases) for details on what's new.
 
 ## Note
 
-Thank you for your interest in this GitHub repo, however, right now we are not taking contributions. 
+Thank you for your interest in this GitHub repo, however, right now we are not taking contributions.
 
 We continue to focus our resources on strategic areas that help our customers be successful while making developers' lives easier. While GitHub Actions remains a key part of this vision, we are allocating resources towards other areas of Actions and are not taking contributions to this repository at this time. The GitHub public roadmap is the best place to follow along for any updates on features we’re working on and what stage they’re in.
 
@@ -95,6 +59,10 @@ We are taking the following steps to better direct requests related to GitHub Ac
 We will still provide security updates for this project and fix major breaking changes during this time.
 
 You are welcome to still raise bugs in this repo.
+
+## GHES Support
+
+`upload-artifact@v4+` is not currently supported on GitHub Enterprise Server (GHES) yet. If you are on GHES, you must use [v3.2.2](https://github.com/actions/upload-artifact/releases/tag/v3.2.2) (Node 24) or [v3.2.2-node20](https://github.com/actions/upload-artifact/releases/tag/v3.2.2-node20) (Node 20).
 
 ## Usage
 
@@ -142,6 +110,11 @@ You are welcome to still raise bugs in this repo.
     # enabled this to avoid uploading sensitive information.
     # Optional. Default is 'false'
     include-hidden-files:
+
+    # Whether to zip the archive files before upload
+    # If 'false', only a single file can be uploaded. The name of the file will be used as the artifact name (the 'name' parameter is ignored)
+    # Optional. Default is 'true'
+    archive:
 ```
 
 ### Outputs
@@ -154,7 +127,7 @@ You are welcome to still raise bugs in this repo.
 
 ## Examples
 
-### Upload an Individual File
+### Upload an Individual File (Zipped)
 
 ```yaml
 steps:
@@ -164,6 +137,18 @@ steps:
   with:
     name: my-artifact
     path: path/to/artifact/world.txt
+```
+
+### Upload an Individual File (Unzipped)
+
+```yaml
+steps:
+- run: mkdir -p path/to/artifact
+- run: echo hello > path/to/artifact/world.txt
+- uses: actions/upload-artifact@v4
+  with:
+    path: path/to/artifact/world.txt
+    archive: false
 ```
 
 ### Upload an Entire Directory
@@ -482,9 +467,9 @@ When an Artifact is uploaded, all the files are assembled into an immutable Zip 
 
 ### Permission Loss
 
-File permissions are not maintained during artifact upload. All directories will have `755` and all files will have `644`. For example, if you make a file executable using `chmod` and then upload that file, post-download the file is no longer guaranteed to be set as an executable.
+File permissions are not maintained during zipped artifact upload. All directories will have `755` and all files will have `644`. For example, if you make a file executable using `chmod` and then upload that file with `archive: true`, post-download the file is no longer guaranteed to be set as an executable.
 
-If you must preserve permissions, you can `tar` all of your files together before artifact upload. Post download, the `tar` file will maintain file permissions and case sensitivity.
+If you must preserve permissions, you can `tar` all of your files together before artifact upload and upload that file directly with `archive: false`. Post download, the `tar` file will maintain file permissions and case sensitivity.
 
 ```yaml
 - name: 'Tar files'
@@ -493,8 +478,8 @@ If you must preserve permissions, you can `tar` all of your files together befor
 - name: 'Upload Artifact'
   uses: actions/upload-artifact@v4
   with:
-    name: my-artifact
     path: my_files.tar
+    archive: false
 ```
 
 ## Where does the upload go?
