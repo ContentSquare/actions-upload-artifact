@@ -109,7 +109,7 @@ You are welcome to still raise bugs in this repo.
     # Optional. Default is 'false'
     include-hidden-files:
 
-    # Whether to zip the archive files before upload
+    # Whether to zip the artifact files before upload
     # If 'false', only a single file can be uploaded. The name of the file will be used as the artifact name (the 'name' parameter is ignored)
     # Optional. Default is 'true'
     archive:
