@@ -11,15 +11,14 @@ Upload [Actions Artifacts](https://docs.github.com/en/actions/using-workflows/st
 See also [download-artifact](https://github.com/actions/download-artifact).
 
 - [`@actions/upload-artifact`](#actionsupload-artifact)
-  - [v6 - What's new](#v6---whats-new)
-  - [v4 - What's new](#v4---whats-new)
-    - [Improvements](#improvements)
-    - [Breaking Changes](#breaking-changes)
+  - [What's new](#whats-new)
+  - [GHES Support](#ghes-support)
   - [Usage](#usage)
     - [Inputs](#inputs)
     - [Outputs](#outputs)
   - [Examples](#examples)
-    - [Upload an Individual File](#upload-an-individual-file)
+    - [Upload an Individual File (Zipped)](#upload-an-individual-file-zipped)
+    - [Upload an Individual File (Unzipped)](#upload-an-individual-file-unzipped)
     - [Upload an Entire Directory](#upload-an-entire-directory)
     - [Upload using a Wildcard Pattern](#upload-using-a-wildcard-pattern)
     - [Upload using Multiple Paths and Exclusions](#upload-using-multiple-paths-and-exclusions)
@@ -34,7 +33,6 @@ See also [download-artifact](https://github.com/actions/download-artifact).
     - [Overwriting an Artifact](#overwriting-an-artifact)
   - [Limitations](#limitations)
     - [Number of Artifacts](#number-of-artifacts)
-    - [Zip archives](#zip-archives)
     - [Permission Loss](#permission-loss)
   - [Where does the upload go?](#where-does-the-upload-go)
 
@@ -460,10 +458,6 @@ they have the `.` prefix.
 Within an individual job, there is a limit of 500 artifacts that can be created for that job.
 
 You may also be limited by Artifacts if you have exceeded your shared storage quota. Storage is calculated every 6-12 hours. See [the documentation](https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#calculating-minute-and-storage-spending) for more info.
-
-### Zip archives
-
-When an Artifact is uploaded, all the files are assembled into an immutable Zip archive. There is currently no way to download artifacts in a format other than a Zip or to download individual artifact contents.
 
 ### Permission Loss
 
